@@ -78,7 +78,7 @@ docker build -t fantaco-customer-main:1.0.0 -f deployment/Dockerfile .
 ### Run Container
 
 ```bash
-docker run -p 8080:8080 \
+docker run -p 8081:8081 \
   -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/customerdb \
   -e SPRING_DATASOURCE_USERNAME=postgres \
   -e SPRING_DATASOURCE_PASSWORD=postgres \
@@ -89,16 +89,16 @@ docker run -p 8080:8080 \
 
 Once the application is running, access:
 
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
-- **OpenAPI JSON**: http://localhost:8080/v3/api-docs
-- **Health Check**: http://localhost:8080/actuator/health
+- **Swagger UI**: http://localhost:8081/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:8081/v3/api-docs
+- **Health Check**: http://localhost:8081/actuator/health
 
 ## API Endpoints
 
 ### Create Customer
 
 ```bash
-curl -X POST http://localhost:8080/api/customers \
+curl -X POST http://localhost:8081/api/customers \
   -H "Content-Type: application/json" \
   -d '{
     "customerId": "ALFKI",
@@ -119,7 +119,7 @@ curl -X POST http://localhost:8080/api/customers \
 ### Get Customer by ID
 
 ```bash
-curl http://localhost:8080/api/customers/ALFKI
+curl http://localhost:8081/api/customers/ALFKI
 ```
 
 **Response**: `200 OK`
@@ -147,13 +147,13 @@ curl http://localhost:8080/api/customers/ALFKI
 
 ```bash
 # Search by company name (partial match, case-insensitive)
-curl "http://localhost:8080/api/customers?companyName=Alfreds"
+curl "http://localhost:8081/api/customers?companyName=Alfreds"
 
 # Search by contact email
-curl "http://localhost:8080/api/customers?contactEmail=maria@"
+curl "http://localhost:8081/api/customers?contactEmail=maria@"
 
 # Search by phone
-curl "http://localhost:8080/api/customers?phone=030"
+curl "http://localhost:8081/api/customers?phone=030"
 ```
 
 **Response**: `200 OK` with array of customers
@@ -161,7 +161,7 @@ curl "http://localhost:8080/api/customers?phone=030"
 ### Update Customer
 
 ```bash
-curl -X PUT http://localhost:8080/api/customers/ALFKI \
+curl -X PUT http://localhost:8081/api/customers/ALFKI \
   -H "Content-Type: application/json" \
   -d '{
     "companyName": "Alfreds Futterkiste GmbH",
@@ -177,7 +177,7 @@ curl -X PUT http://localhost:8080/api/customers/ALFKI \
 ### Delete Customer
 
 ```bash
-curl -X DELETE http://localhost:8080/api/customers/ALFKI
+curl -X DELETE http://localhost:8081/api/customers/ALFKI
 ```
 
 **Response**: `204 No Content`

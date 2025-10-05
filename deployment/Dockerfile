@@ -11,5 +11,5 @@ RUN mvn clean package -DskipTests
 FROM registry.access.redhat.com/ubi9/openjdk-21-runtime:latest
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
