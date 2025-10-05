@@ -112,7 +112,7 @@ deployment/
 │   ├── service.yaml
 │   └── configmap.yaml
 └── helm/
-    └── customer-api/
+    └── fantaco-customer-main/
         ├── Chart.yaml
         ├── values.yaml
         └── templates/

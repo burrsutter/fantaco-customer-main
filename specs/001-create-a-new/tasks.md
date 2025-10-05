@@ -142,11 +142,11 @@ This is a single Maven project following standard Spring Boot structure:
 
 ### Deployment
 
-- [ ] **T033** Create Helm chart structure `deployment/helm/customer-api/Chart.yaml` with chart metadata (name, version, description, appVersion)
+- [ ] **T033** Create Helm chart structure `deployment/helm/fantaco-customer-main/Chart.yaml` with chart metadata (name, version, description, appVersion)
 
-- [ ] **T034** Create `deployment/helm/customer-api/values.yaml` with default values: replicaCount, image (repository, tag, pullPolicy), service (type, port, targetPort), database (host, port, name), resources (limits, requests), ingress configuration
+- [ ] **T034** Create `deployment/helm/fantaco-customer-main/values.yaml` with default values: replicaCount, image (repository, tag, pullPolicy), service (type, port, targetPort), database (host, port, name), resources (limits, requests), ingress configuration
 
-- [ ] **T035** [P] Create Helm templates: `deployment/helm/customer-api/templates/deployment.yaml`, `deployment/helm/customer-api/templates/service.yaml`, `deployment/helm/customer-api/templates/configmap.yaml`, `deployment/helm/customer-api/templates/_helpers.tpl`
+- [ ] **T035** [P] Create Helm templates: `deployment/helm/fantaco-customer-main/templates/deployment.yaml`, `deployment/helm/fantaco-customer-main/templates/service.yaml`, `deployment/helm/fantaco-customer-main/templates/configmap.yaml`, `deployment/helm/fantaco-customer-main/templates/_helpers.tpl`
 
 ---
 

@@ -191,7 +191,7 @@ readinessProbe:
 
 **Chart Structure**:
 ```
-helm/customer-api/
+helm/fantaco-customer-main/
 ├── Chart.yaml              # Chart metadata
 ├── values.yaml             # Default configuration values
 ├── values-dev.yaml         # Dev environment overrides
@@ -211,7 +211,7 @@ helm/customer-api/
 replicaCount: 2
 
 image:
-  repository: customer-api
+  repository: fantaco-customer-main
   tag: "1.0.0"
   pullPolicy: IfNotPresent
 
