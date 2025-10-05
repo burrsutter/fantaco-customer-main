@@ -32,7 +32,7 @@ mvn clean package
 Ensure PostgreSQL is running and update `src/main/resources/application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/customerdb
+spring.datasource.url=jdbc:postgresql://localhost:5432/fantaco_customer
 spring.datasource.username=postgres
 spring.datasource.password=postgres
 ```
@@ -53,7 +53,7 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: customerdb
+      POSTGRES_DB: fantaco_customer
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -79,7 +79,7 @@ docker build -t fantaco-customer-main:1.0.0 -f deployment/Dockerfile .
 
 ```bash
 docker run -p 8081:8081 \
-  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/customerdb \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/fantaco_customer \
   -e SPRING_DATASOURCE_USERNAME=postgres \
   -e SPRING_DATASOURCE_PASSWORD=postgres \
   fantaco-customer-main:1.0.0
