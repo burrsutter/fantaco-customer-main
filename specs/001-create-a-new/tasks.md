@@ -40,21 +40,21 @@ This is a single Maven project following standard Spring Boot structure:
 
 ## Phase 3.1: Setup
 
-- [ ] **T001** Create Maven project structure with `pom.xml` including Spring Boot 3.2.0, Spring Data JPA, Spring Web, PostgreSQL driver, Springdoc OpenAPI, Spring Boot Actuator, Testcontainers dependencies
+- [X] **T001** Create Maven project structure with `pom.xml` including Spring Boot 3.2.0, Spring Data JPA, Spring Web, PostgreSQL driver, Springdoc OpenAPI, Spring Boot Actuator, Testcontainers dependencies
 
-- [ ] **T002** Create Spring Boot main application class `src/main/java/com/customer/CustomerApplication.java` with `@SpringBootApplication` annotation
+- [X] **T002** Create Spring Boot main application class `src/main/java/com/customer/CustomerApplication.java` with `@SpringBootApplication` annotation
 
-- [ ] **T003** Create `src/main/resources/application.properties` with PostgreSQL datasource configuration, JPA/Hibernate settings, logging configuration
+- [X] **T003** Create `src/main/resources/application.properties` with PostgreSQL datasource configuration, JPA/Hibernate settings, logging configuration
 
-- [ ] **T004** Create `src/main/resources/application-test.properties` for test profile with H2 or Testcontainers PostgreSQL configuration
+- [X] **T004** Create `src/main/resources/application-test.properties` for test profile with H2 or Testcontainers PostgreSQL configuration
 
-- [ ] **T005** Create `deployment/Dockerfile` with multi-stage build using Red Hat UBI9 OpenJDK 21 images (build stage: `ubi9/openjdk-21`, runtime stage: `ubi9/openjdk-21-runtime`) following research.md guidelines
+- [X] **T005** Create `deployment/Dockerfile` with multi-stage build using Red Hat UBI9 OpenJDK 21 images (build stage: `ubi9/openjdk-21`, runtime stage: `ubi9/openjdk-21-runtime`) following research.md guidelines
 
-- [ ] **T006** Create `deployment/kubernetes/deployment.yaml` with Kubernetes Deployment manifest including health probes, resource limits, PostgreSQL connection configuration
+- [X] **T006** Create `deployment/kubernetes/deployment.yaml` with Kubernetes Deployment manifest including health probes, resource limits, PostgreSQL connection configuration
 
-- [ ] **T007** Create `deployment/kubernetes/service.yaml` with Kubernetes Service manifest exposing port 8080
+- [X] **T007** Create `deployment/kubernetes/service.yaml` with Kubernetes Service manifest exposing port 8080
 
-- [ ] **T008** Create `deployment/kubernetes/configmap.yaml` with ConfigMap for application configuration
+- [X] **T008** Create `deployment/kubernetes/configmap.yaml` with ConfigMap for application configuration
 
 ---
 
@@ -64,31 +64,31 @@ This is a single Maven project following standard Spring Boot structure:
 
 ### Contract Tests (API Endpoint Validation)
 
-- [ ] **T009** [P] Create contract test `src/test/java/com/customer/contract/CreateCustomerContractTest.java` for POST /api/customers - validate request schema (customerId 5 chars, companyName required, all optional fields), validate 201 response with Location header, validate 400 for invalid input, validate 409 for duplicate customerId
+- [X] **T009** [P] Create contract test `src/test/java/com/customer/contract/CreateCustomerContractTest.java` for POST /api/customers - validate request schema (customerId 5 chars, companyName required, all optional fields), validate 201 response with Location header, validate 400 for invalid input, validate 409 for duplicate customerId
 
-- [ ] **T010** [P] Create contract test `src/test/java/com/customer/contract/GetCustomerByIdContractTest.java` for GET /api/customers/{customerId} - validate 200 response schema with all 14 fields, validate 404 for non-existent customer
+- [X] **T010** [P] Create contract test `src/test/java/com/customer/contract/GetCustomerByIdContractTest.java` for GET /api/customers/{customerId} - validate 200 response schema with all 14 fields, validate 404 for non-existent customer
 
-- [ ] **T011** [P] Create contract test `src/test/java/com/customer/contract/SearchCustomersContractTest.java` for GET /api/customers with query params - validate companyName/contactName/contactEmail/phone search parameters, validate array response, validate empty array for no results
+- [X] **T011** [P] Create contract test `src/test/java/com/customer/contract/SearchCustomersContractTest.java` for GET /api/customers with query params - validate companyName/contactName/contactEmail/phone search parameters, validate array response, validate empty array for no results
 
-- [ ] **T012** [P] Create contract test `src/test/java/com/customer/contract/UpdateCustomerContractTest.java` for PUT /api/customers/{customerId} - validate request schema (companyName required, customerId in path not body), validate 200 response, validate 404 for non-existent customer, validate 400 for invalid input
+- [X] **T012** [P] Create contract test `src/test/java/com/customer/contract/UpdateCustomerContractTest.java` for PUT /api/customers/{customerId} - validate request schema (companyName required, customerId in path not body), validate 200 response, validate 404 for non-existent customer, validate 400 for invalid input
 
-- [ ] **T013** [P] Create contract test `src/test/java/com/customer/contract/DeleteCustomerContractTest.java` for DELETE /api/customers/{customerId} - validate 204 no content response, validate 404 for non-existent customer
+- [X] **T013** [P] Create contract test `src/test/java/com/customer/contract/DeleteCustomerContractTest.java` for DELETE /api/customers/{customerId} - validate 204 no content response, validate 404 for non-existent customer
 
 ### Integration Tests (End-to-End Scenarios from quickstart.md)
 
-- [ ] **T014** [P] Create integration test `src/test/java/com/customer/integration/CreateCustomerIntegrationTest.java` using Testcontainers PostgreSQL - test create with full data, test create with minimal data (only required fields), verify database persistence
+- [X] **T014** [P] Create integration test `src/test/java/com/customer/integration/CreateCustomerIntegrationTest.java` using Testcontainers PostgreSQL - test create with full data, test create with minimal data (only required fields), verify database persistence
 
-- [ ] **T015** [P] Create integration test `src/test/java/com/customer/integration/RetrieveCustomerIntegrationTest.java` using Testcontainers - test get by customerId, verify all fields returned correctly
+- [X] **T015** [P] Create integration test `src/test/java/com/customer/integration/RetrieveCustomerIntegrationTest.java` using Testcontainers - test get by customerId, verify all fields returned correctly
 
-- [ ] **T016** [P] Create integration test `src/test/java/com/customer/integration/SearchCustomerIntegrationTest.java` using Testcontainers - test partial match search by companyName, contactName, contactEmail, phone; test case-insensitive search; test no results scenario
+- [X] **T016** [P] Create integration test `src/test/java/com/customer/integration/SearchCustomerIntegrationTest.java` using Testcontainers - test partial match search by companyName, contactName, contactEmail, phone; test case-insensitive search; test no results scenario
 
-- [ ] **T017** [P] Create integration test `src/test/java/com/customer/integration/UpdateCustomerIntegrationTest.java` using Testcontainers - test update existing customer, verify updatedAt timestamp changes, test 404 for non-existent customer
+- [X] **T017** [P] Create integration test `src/test/java/com/customer/integration/UpdateCustomerIntegrationTest.java` using Testcontainers - test update existing customer, verify updatedAt timestamp changes, test 404 for non-existent customer
 
-- [ ] **T018** [P] Create integration test `src/test/java/com/customer/integration/DeleteCustomerIntegrationTest.java` using Testcontainers - test hard delete, verify subsequent GET returns 404, test delete non-existent customer returns 404
+- [X] **T018** [P] Create integration test `src/test/java/com/customer/integration/DeleteCustomerIntegrationTest.java` using Testcontainers - test hard delete, verify subsequent GET returns 404, test delete non-existent customer returns 404
 
-- [ ] **T019** [P] Create integration test `src/test/java/com/customer/integration/ValidationIntegrationTest.java` using Testcontainers - test customerId length validation (must be 5 chars), test companyName required, test field max length validations, test email format validation
+- [X] **T019** [P] Create integration test `src/test/java/com/customer/integration/ValidationIntegrationTest.java` using Testcontainers - test customerId length validation (must be 5 chars), test companyName required, test field max length validations, test email format validation
 
-- [ ] **T020** [P] Create integration test `src/test/java/com/customer/integration/DuplicateCustomerIdTest.java` using Testcontainers - test creating customer with duplicate customerId returns 409 Conflict
+- [X] **T020** [P] Create integration test `src/test/java/com/customer/integration/DuplicateCustomerIdTest.java` using Testcontainers - test creating customer with duplicate customerId returns 409 Conflict
 
 ---
 
@@ -96,25 +96,25 @@ This is a single Maven project following standard Spring Boot structure:
 
 ### Data Model & DTOs
 
-- [ ] **T021** Create JPA entity `src/main/java/com/customer/model/Customer.java` with 14 fields (customerId as @Id String 5 chars, companyName VARCHAR(40) NOT NULL, 10 optional fields, createdAt/updatedAt timestamps), Bean Validation annotations (@NotBlank, @Size, @Email), indexes for search fields (see data-model.md)
+- [X] **T021** Create JPA entity `src/main/java/com/customer/model/Customer.java` with 14 fields (customerId as @Id String 5 chars, companyName VARCHAR(40) NOT NULL, 10 optional fields, createdAt/updatedAt timestamps), Bean Validation annotations (@NotBlank, @Size, @Email), indexes for search fields (see data-model.md)
 
-- [ ] **T022** [P] Create DTO `src/main/java/com/customer/dto/CustomerRequest.java` as Java record with customerId (required, 5 chars), companyName (required, max 40), 10 optional fields with validation annotations matching data-model.md
+- [X] **T022** [P] Create DTO `src/main/java/com/customer/dto/CustomerRequest.java` as Java record with customerId (required, 5 chars), companyName (required, max 40), 10 optional fields with validation annotations matching data-model.md
 
-- [ ] **T023** [P] Create DTO `src/main/java/com/customer/dto/CustomerUpdateRequest.java` as Java record with companyName (required), 10 optional fields (customerId excluded - comes from path parameter)
+- [X] **T023** [P] Create DTO `src/main/java/com/customer/dto/CustomerUpdateRequest.java` as Java record with companyName (required), 10 optional fields (customerId excluded - comes from path parameter)
 
-- [ ] **T024** [P] Create DTO `src/main/java/com/customer/dto/CustomerResponse.java` as Java record with all 14 fields including createdAt and updatedAt
+- [X] **T024** [P] Create DTO `src/main/java/com/customer/dto/CustomerResponse.java` as Java record with all 14 fields including createdAt and updatedAt
 
 ### Repository Layer
 
-- [ ] **T025** Create Spring Data JPA repository `src/main/java/com/customer/repository/CustomerRepository.java` extending JpaRepository<Customer, String> with query methods: `findByCompanyNameContainingIgnoreCase`, `findByContactNameContainingIgnoreCase`, `findByContactEmailContainingIgnoreCase`, `findByPhoneContaining`
+- [X] **T025** Create Spring Data JPA repository `src/main/java/com/customer/repository/CustomerRepository.java` extending JpaRepository<Customer, String> with query methods: `findByCompanyNameContainingIgnoreCase`, `findByContactNameContainingIgnoreCase`, `findByContactEmailContainingIgnoreCase`, `findByPhoneContaining`
 
 ### Service Layer
 
-- [ ] **T026** Create service `src/main/java/com/customer/service/CustomerService.java` with methods: `createCustomer(CustomerRequest)` returning CustomerResponse (validate uniqueness, throw exception for duplicate customerId), `getCustomerById(String customerId)` returning CustomerResponse (throw exception if not found), `searchCustomers(String companyName, String contactName, String contactEmail, String phone)` returning List<CustomerResponse> (support partial text search, case-insensitive), `updateCustomer(String customerId, CustomerUpdateRequest)` returning CustomerResponse (throw exception if not found), `deleteCustomer(String customerId)` (hard delete, throw exception if not found)
+- [X] **T026** Create service `src/main/java/com/customer/service/CustomerService.java` with methods: `createCustomer(CustomerRequest)` returning CustomerResponse (validate uniqueness, throw exception for duplicate customerId), `getCustomerById(String customerId)` returning CustomerResponse (throw exception if not found), `searchCustomers(String companyName, String contactName, String contactEmail, String phone)` returning List<CustomerResponse> (support partial text search, case-insensitive), `updateCustomer(String customerId, CustomerUpdateRequest)` returning CustomerResponse (throw exception if not found), `deleteCustomer(String customerId)` (hard delete, throw exception if not found)
 
 ### Controller Layer
 
-- [ ] **T027** Create REST controller `src/main/java/com/customer/controller/CustomerController.java` with 5 endpoints matching OpenAPI spec: POST /api/customers (returns 201 with Location header, 400 for validation errors, 409 for duplicate ID), GET /api/customers/{customerId} (returns 200 or 404), GET /api/customers with query params (returns 200 with array), PUT /api/customers/{customerId} (returns 200, 404, or 400), DELETE /api/customers/{customerId} (returns 204 or 404). Include @Tag and @Operation annotations for OpenAPI docs
+- [X] **T027** Create REST controller `src/main/java/com/customer/controller/CustomerController.java` with 5 endpoints matching OpenAPI spec: POST /api/customers (returns 201 with Location header, 400 for validation errors, 409 for duplicate ID), GET /api/customers/{customerId} (returns 200 or 404), GET /api/customers with query params (returns 200 with array), PUT /api/customers/{customerId} (returns 200, 404, or 400), DELETE /api/customers/{customerId} (returns 204 or 404). Include @Tag and @Operation annotations for OpenAPI docs
 
 ---
 
@@ -122,15 +122,15 @@ This is a single Maven project following standard Spring Boot structure:
 
 ### Error Handling & Validation
 
-- [ ] **T028** Create global exception handler `src/main/java/com/customer/exception/GlobalExceptionHandler.java` using @RestControllerAdvice - handle EntityNotFoundException (404), MethodArgumentNotValidException (400 with field-level errors), DataIntegrityViolationException for duplicate IDs (409), generic exceptions (500). Return ErrorResponse DTO with timestamp, status, error, message, and errors array
+- [X] **T028** Create global exception handler `src/main/java/com/customer/exception/GlobalExceptionHandler.java` using @RestControllerAdvice - handle EntityNotFoundException (404), MethodArgumentNotValidException (400 with field-level errors), DataIntegrityViolationException for duplicate IDs (409), generic exceptions (500). Return ErrorResponse DTO with timestamp, status, error, message, and errors array
 
-- [ ] **T029** [P] Create exception classes: `src/main/java/com/customer/exception/CustomerNotFoundException.java`, `src/main/java/com/customer/exception/DuplicateCustomerIdException.java`
+- [X] **T029** [P] Create exception classes: `src/main/java/com/customer/exception/CustomerNotFoundException.java`, `src/main/java/com/customer/exception/DuplicateCustomerIdException.java`
 
-- [ ] **T030** [P] Create `src/main/java/com/customer/dto/ErrorResponse.java` as Java record matching OpenAPI ErrorResponse schema (timestamp, status, error, message, errors list)
+- [X] **T030** [P] Create `src/main/java/com/customer/dto/ErrorResponse.java` as Java record matching OpenAPI ErrorResponse schema (timestamp, status, error, message, errors list)
 
 ### Configuration & Documentation
 
-- [ ] **T031** Update `src/main/resources/application.properties` with Springdoc OpenAPI configuration (api-docs path, swagger-ui path), Spring Boot Actuator health endpoints enabled, logging levels for com.customer package
+- [X] **T031** Update `src/main/resources/application.properties` with Springdoc OpenAPI configuration (api-docs path, swagger-ui path), Spring Boot Actuator health endpoints enabled, logging levels for com.customer package
 
 ---
 
@@ -138,15 +138,15 @@ This is a single Maven project following standard Spring Boot structure:
 
 ### Documentation
 
-- [ ] **T032** Create `README.md` at repository root with: project description, prerequisites (Java 17, Maven, PostgreSQL/Docker), build instructions (`mvn clean package`), run instructions (`mvn spring-boot:run`), Docker build/run commands, curl examples for all 5 endpoints (GET, POST, PUT, DELETE) from quickstart.md, OpenAPI/Swagger UI URL (http://localhost:8080/swagger-ui.html), health check URL (http://localhost:8080/actuator/health)
+- [X] **T032** Create `README.md` at repository root with: project description, prerequisites (Java 17, Maven, PostgreSQL/Docker), build instructions (`mvn clean package`), run instructions (`mvn spring-boot:run`), Docker build/run commands, curl examples for all 5 endpoints (GET, POST, PUT, DELETE) from quickstart.md, OpenAPI/Swagger UI URL (http://localhost:8080/swagger-ui.html), health check URL (http://localhost:8080/actuator/health)
 
 ### Deployment
 
-- [ ] **T033** Create Helm chart structure `deployment/helm/fantaco-customer-main/Chart.yaml` with chart metadata (name, version, description, appVersion)
+- [X] **T033** Create Helm chart structure `deployment/helm/fantaco-customer-main/Chart.yaml` with chart metadata (name, version, description, appVersion)
 
-- [ ] **T034** Create `deployment/helm/fantaco-customer-main/values.yaml` with default values: replicaCount, image (repository, tag, pullPolicy), service (type, port, targetPort), database (host, port, name), resources (limits, requests), ingress configuration
+- [X] **T034** Create `deployment/helm/fantaco-customer-main/values.yaml` with default values: replicaCount, image (repository, tag, pullPolicy), service (type, port, targetPort), database (host, port, name), resources (limits, requests), ingress configuration
 
-- [ ] **T035** [P] Create Helm templates: `deployment/helm/fantaco-customer-main/templates/deployment.yaml`, `deployment/helm/fantaco-customer-main/templates/service.yaml`, `deployment/helm/fantaco-customer-main/templates/configmap.yaml`, `deployment/helm/fantaco-customer-main/templates/_helpers.tpl`
+- [X] **T035** [P] Create Helm templates: `deployment/helm/fantaco-customer-main/templates/deployment.yaml`, `deployment/helm/fantaco-customer-main/templates/service.yaml`, `deployment/helm/fantaco-customer-main/templates/configmap.yaml`, `deployment/helm/fantaco-customer-main/templates/_helpers.tpl`
 
 ---
 

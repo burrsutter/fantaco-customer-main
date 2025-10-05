@@ -1,0 +1,314 @@
+# Customer Master Data API
+
+REST API for managing customer master data. External systems can create, read, update, and delete customer records with support for searching by ID, company name, contact name, email, and phone number.
+
+## Features
+
+- **CRUD Operations**: Create, Read, Update, Delete customer records
+- **Advanced Search**: Partial match, case-insensitive search by multiple fields
+- **Validation**: Bean Validation with detailed error messages
+- **OpenAPI Documentation**: Auto-generated Swagger UI
+- **Health Checks**: Kubernetes-ready liveness and readiness probes
+- **Containerized**: Multi-stage Docker build with Red Hat UBI9 images
+
+## Prerequisites
+
+- **Java 21** (OpenJDK or Oracle JDK)
+- **Maven 3.8+**
+- **PostgreSQL 15+** (or Docker for local development)
+- **Docker** (optional, for containerization)
+- **Kubernetes** (optional, for deployment)
+
+## Build
+
+```bash
+mvn clean package
+```
+
+## Run Locally
+
+### Option 1: With Local PostgreSQL
+
+Ensure PostgreSQL is running and update `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/customerdb
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+```
+
+Run the application:
+
+```bash
+mvn spring-boot:run
+```
+
+### Option 2: With Docker Compose
+
+Create `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: customerdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+```
+
+Start PostgreSQL:
+
+```bash
+docker-compose up -d
+mvn spring-boot:run
+```
+
+## Docker
+
+### Build Image
+
+```bash
+docker build -t fantaco-customer-main:1.0.0 -f deployment/Dockerfile .
+```
+
+### Run Container
+
+```bash
+docker run -p 8080:8080 \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/customerdb \
+  -e SPRING_DATASOURCE_USERNAME=postgres \
+  -e SPRING_DATASOURCE_PASSWORD=postgres \
+  fantaco-customer-main:1.0.0
+```
+
+## API Documentation
+
+Once the application is running, access:
+
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:8080/v3/api-docs
+- **Health Check**: http://localhost:8080/actuator/health
+
+## API Endpoints
+
+### Create Customer
+
+```bash
+curl -X POST http://localhost:8080/api/customers \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customerId": "ALFKI",
+    "companyName": "Alfreds Futterkiste",
+    "contactName": "Maria Anders",
+    "contactTitle": "Sales Representative",
+    "address": "Obere Str. 57",
+    "city": "Berlin",
+    "postalCode": "12209",
+    "country": "Germany",
+    "phone": "030-0074321",
+    "contactEmail": "maria.anders@alfki.com"
+  }'
+```
+
+**Response**: `201 Created` with `Location` header
+
+### Get Customer by ID
+
+```bash
+curl http://localhost:8080/api/customers/ALFKI
+```
+
+**Response**: `200 OK`
+
+```json
+{
+  "customerId": "ALFKI",
+  "companyName": "Alfreds Futterkiste",
+  "contactName": "Maria Anders",
+  "contactTitle": "Sales Representative",
+  "address": "Obere Str. 57",
+  "city": "Berlin",
+  "region": null,
+  "postalCode": "12209",
+  "country": "Germany",
+  "phone": "030-0074321",
+  "fax": null,
+  "contactEmail": "maria.anders@alfki.com",
+  "createdAt": "2025-10-05T10:30:00",
+  "updatedAt": "2025-10-05T10:30:00"
+}
+```
+
+### Search Customers
+
+```bash
+# Search by company name (partial match, case-insensitive)
+curl "http://localhost:8080/api/customers?companyName=Alfreds"
+
+# Search by contact email
+curl "http://localhost:8080/api/customers?contactEmail=maria@"
+
+# Search by phone
+curl "http://localhost:8080/api/customers?phone=030"
+```
+
+**Response**: `200 OK` with array of customers
+
+### Update Customer
+
+```bash
+curl -X PUT http://localhost:8080/api/customers/ALFKI \
+  -H "Content-Type: application/json" \
+  -d '{
+    "companyName": "Alfreds Futterkiste GmbH",
+    "contactName": "Maria Anders",
+    "contactTitle": "Sales Manager",
+    "phone": "030-0074322",
+    "contactEmail": "maria.anders@alfki.de"
+  }'
+```
+
+**Response**: `200 OK` with updated customer
+
+### Delete Customer
+
+```bash
+curl -X DELETE http://localhost:8080/api/customers/ALFKI
+```
+
+**Response**: `204 No Content`
+
+## Validation Rules
+
+- **customerId**: Required, exactly 5 characters
+- **companyName**: Required, max 40 characters
+- **contactName**: Optional, max 30 characters
+- **contactEmail**: Optional, valid email format, max 255 characters
+- **phone**: Optional, max 24 characters
+- All other fields are optional with defined max lengths
+
+## Error Handling
+
+### Validation Error (400 Bad Request)
+
+```json
+{
+  "timestamp": "2025-10-05T10:30:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "errors": [
+    {
+      "field": "customerId",
+      "rejectedValue": "ABC",
+      "message": "Customer ID must be exactly 5 characters"
+    }
+  ]
+}
+```
+
+### Not Found (404)
+
+```json
+{
+  "timestamp": "2025-10-05T10:30:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Customer with ID XXXXX not found"
+}
+```
+
+### Duplicate ID (409 Conflict)
+
+```json
+{
+  "timestamp": "2025-10-05T10:30:00",
+  "status": 409,
+  "error": "Conflict",
+  "message": "Customer with ID ALFKI already exists"
+}
+```
+
+## Kubernetes Deployment
+
+### Apply Manifests
+
+```bash
+kubectl apply -f deployment/kubernetes/configmap.yaml
+kubectl apply -f deployment/kubernetes/deployment.yaml
+kubectl apply -f deployment/kubernetes/service.yaml
+```
+
+### Helm Chart
+
+```bash
+helm install fantaco-customer deployment/helm/fantaco-customer-main \
+  --set database.host=postgres-service \
+  --set database.password=yourpassword
+```
+
+## Testing
+
+### Run All Tests
+
+```bash
+mvn test
+```
+
+### Run Integration Tests Only
+
+```bash
+mvn test -Dtest="**/*IntegrationTest"
+```
+
+### Run Contract Tests Only
+
+```bash
+mvn test -Dtest="**/*ContractTest"
+```
+
+**Note**: Integration tests use Testcontainers, which requires Docker to be running.
+
+## Technology Stack
+
+- **Java 21**
+- **Spring Boot 3.2.0**
+- **Spring Data JPA** (with Hibernate)
+- **PostgreSQL 15+**
+- **Maven 3.8+**
+- **Springdoc OpenAPI 2.2.0**
+- **Testcontainers** (for integration testing)
+- **Docker** (Red Hat UBI9 base images)
+- **Kubernetes** (with Helm charts)
+
+## Architecture
+
+```
+┌─────────────────┐
+│   Controller    │  REST API Layer (validation, error handling)
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│    Service      │  Business Logic Layer
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│   Repository    │  Data Access Layer (Spring Data JPA)
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│   PostgreSQL    │  Database
+└─────────────────┘
+```
+
+## License
+
+Proprietary - All rights reserved
+
+## Support
+
+For questions or issues, contact the development team.
