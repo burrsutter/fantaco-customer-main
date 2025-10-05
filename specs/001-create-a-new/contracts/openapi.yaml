@@ -1,0 +1,655 @@
+openapi: 3.0.3
+info:
+  title: Customer Master Data API
+  description: |
+    REST API for managing customer master data. External systems can create, read, update,
+    and delete customer records. Supports searching by ID, company name, contact name,
+    contact email, and phone number with partial matching (case-insensitive).
+
+    **Authentication**: None (open API)
+
+    **Search Behavior**: All text searches use partial match (contains) with case-insensitive comparison.
+
+    **Concurrency**: Last-write-wins strategy (no optimistic locking).
+
+    **Delete Behavior**: Hard delete (permanent removal).
+
+    **Customer ID**: 5-character identifier (user-provided, must be unique).
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Customer
+    description: Customer master data management operations
+
+paths:
+  /api/customers:
+    post:
+      tags:
+        - Customer
+      summary: Create a new customer
+      description: |
+        Creates a new customer record with the provided information.
+        Required fields: customerId (5 characters), companyName.
+        All other fields are optional.
+      operationId: createCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+            examples:
+              validCustomer:
+                summary: Valid customer with all fields
+                value:
+                  customerId: "ALFKI"
+                  companyName: "Alfreds Futterkiste"
+                  contactName: "Maria Anders"
+                  contactTitle: "Sales Representative"
+                  address: "Obere Str. 57"
+                  city: "Berlin"
+                  region: null
+                  postalCode: "12209"
+                  country: "Germany"
+                  phone: "030-0074321"
+                  fax: "030-0076545"
+                  contactEmail: "maria.anders@alfki.com"
+              minimalCustomer:
+                summary: Minimal valid customer (required fields only)
+                value:
+                  customerId: "ANATR"
+                  companyName: "Ana Trujillo Emparedados"
+      responses:
+        '201':
+          description: Customer created successfully
+          headers:
+            Location:
+              description: URL of the created customer resource
+              schema:
+                type: string
+                example: /api/customers/ALFKI
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+              examples:
+                createdCustomer:
+                  summary: Newly created customer
+                  value:
+                    customerId: "ALFKI"
+                    companyName: "Alfreds Futterkiste"
+                    contactName: "Maria Anders"
+                    contactTitle: "Sales Representative"
+                    address: "Obere Str. 57"
+                    city: "Berlin"
+                    region: null
+                    postalCode: "12209"
+                    country: "Germany"
+                    phone: "030-0074321"
+                    fax: "030-0076545"
+                    contactEmail: "maria.anders@alfki.com"
+                    createdAt: "2025-10-05T10:30:00Z"
+                    updatedAt: "2025-10-05T10:30:00Z"
+        '400':
+          description: Invalid input data (validation failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation errors
+                  value:
+                    timestamp: "2025-10-05T10:30:00Z"
+                    status: 400
+                    error: "Bad Request"
+                    message: "Validation failed"
+                    errors:
+                      - field: "customerId"
+                        rejectedValue: "ABC"
+                        message: "Customer ID must be exactly 5 characters"
+                      - field: "companyName"
+                        rejectedValue: ""
+                        message: "Company name is required"
+        '409':
+          description: Customer ID already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicateId:
+                  summary: Duplicate customer ID
+                  value:
+                    timestamp: "2025-10-05T10:30:00Z"
+                    status: 409
+                    error: "Conflict"
+                    message: "Customer with ID ALFKI already exists"
+
+    get:
+      tags:
+        - Customer
+      summary: Search customers
+      description: |
+        Search for customers by various fields. All searches use partial matching (contains)
+        with case-insensitive comparison. If no query parameters are provided, returns all customers.
+        Multiple query parameters can be combined (AND logic).
+      operationId: searchCustomers
+      parameters:
+        - name: companyName
+          in: query
+          description: Search by company name (partial match, case-insensitive)
+          required: false
+          schema:
+            type: string
+            example: "Alfreds"
+        - name: contactName
+          in: query
+          description: Search by contact name (partial match, case-insensitive)
+          required: false
+          schema:
+            type: string
+            example: "Maria"
+        - name: contactEmail
+          in: query
+          description: Search by contact email (partial match, case-insensitive)
+          required: false
+          schema:
+            type: string
+            example: "maria@alfki"
+        - name: phone
+          in: query
+          description: Search by phone number (partial match)
+          required: false
+          schema:
+            type: string
+            example: "030"
+      responses:
+        '200':
+          description: List of customers matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerResponse'
+              examples:
+                multipleCustomers:
+                  summary: Multiple matching customers
+                  value:
+                    - customerId: "ALFKI"
+                      companyName: "Alfreds Futterkiste"
+                      contactName: "Maria Anders"
+                      contactTitle: "Sales Representative"
+                      address: "Obere Str. 57"
+                      city: "Berlin"
+                      region: null
+                      postalCode: "12209"
+                      country: "Germany"
+                      phone: "030-0074321"
+                      fax: "030-0076545"
+                      contactEmail: "maria.anders@alfki.com"
+                      createdAt: "2025-10-05T10:30:00Z"
+                      updatedAt: "2025-10-05T10:30:00Z"
+                    - customerId: "ANATR"
+                      companyName: "Ana Trujillo Emparedados"
+                      contactName: "Ana Trujillo"
+                      contactTitle: "Owner"
+                      address: "Avda. de la Constitución 2222"
+                      city: "México D.F."
+                      region: null
+                      postalCode: "05021"
+                      country: "Mexico"
+                      phone: "(5) 555-4729"
+                      fax: "(5) 555-3745"
+                      contactEmail: "ana@anatr.com"
+                      createdAt: "2025-10-05T10:35:00Z"
+                      updatedAt: "2025-10-05T10:35:00Z"
+                emptyResult:
+                  summary: No customers found
+                  value: []
+
+  /api/customers/{customerId}:
+    get:
+      tags:
+        - Customer
+      summary: Get customer by ID
+      description: Retrieves a single customer record by its unique 5-character identifier.
+      operationId: getCustomerById
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer unique identifier (5 characters)
+          required: true
+          schema:
+            type: string
+            minLength: 5
+            maxLength: 5
+            example: "ALFKI"
+      responses:
+        '200':
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+              examples:
+                existingCustomer:
+                  summary: Customer details
+                  value:
+                    customerId: "ALFKI"
+                    companyName: "Alfreds Futterkiste"
+                    contactName: "Maria Anders"
+                    contactTitle: "Sales Representative"
+                    address: "Obere Str. 57"
+                    city: "Berlin"
+                    region: null
+                    postalCode: "12209"
+                    country: "Germany"
+                    phone: "030-0074321"
+                    fax: "030-0076545"
+                    contactEmail: "maria.anders@alfki.com"
+                    createdAt: "2025-10-05T10:30:00Z"
+                    updatedAt: "2025-10-05T10:30:00Z"
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  summary: Customer does not exist
+                  value:
+                    timestamp: "2025-10-05T10:30:00Z"
+                    status: 404
+                    error: "Not Found"
+                    message: "Customer with ID ALFKI not found"
+
+    put:
+      tags:
+        - Customer
+      summary: Update customer
+      description: |
+        Updates an existing customer record. All fields must be provided (full replacement).
+        Uses last-write-wins strategy - no conflict detection.
+        Customer ID cannot be changed (it's in the path).
+      operationId: updateCustomer
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer unique identifier (5 characters)
+          required: true
+          schema:
+            type: string
+            minLength: 5
+            maxLength: 5
+            example: "ALFKI"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdateRequest'
+            examples:
+              updatedCustomer:
+                summary: Updated customer data
+                value:
+                  companyName: "Alfreds Futterkiste GmbH"
+                  contactName: "Maria Anders"
+                  contactTitle: "Sales Manager"
+                  address: "Obere Str. 57"
+                  city: "Berlin"
+                  region: null
+                  postalCode: "12209"
+                  country: "Germany"
+                  phone: "030-0074322"
+                  fax: "030-0076545"
+                  contactEmail: "maria.anders@alfki.de"
+      responses:
+        '200':
+          description: Customer updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+              examples:
+                updatedCustomer:
+                  summary: Updated customer
+                  value:
+                    customerId: "ALFKI"
+                    companyName: "Alfreds Futterkiste GmbH"
+                    contactName: "Maria Anders"
+                    contactTitle: "Sales Manager"
+                    address: "Obere Str. 57"
+                    city: "Berlin"
+                    region: null
+                    postalCode: "12209"
+                    country: "Germany"
+                    phone: "030-0074322"
+                    fax: "030-0076545"
+                    contactEmail: "maria.anders@alfki.de"
+                    createdAt: "2025-10-05T10:30:00Z"
+                    updatedAt: "2025-10-05T12:45:00Z"
+        '400':
+          description: Invalid input data (validation failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Customer
+      summary: Delete customer
+      description: |
+        Permanently deletes a customer record (hard delete). This operation cannot be undone.
+      operationId: deleteCustomer
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer unique identifier (5 characters)
+          required: true
+          schema:
+            type: string
+            minLength: 5
+            maxLength: 5
+            example: "ALFKI"
+      responses:
+        '204':
+          description: Customer deleted successfully (no content)
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  summary: Customer does not exist
+                  value:
+                    timestamp: "2025-10-05T10:30:00Z"
+                    status: 404
+                    error: "Not Found"
+                    message: "Customer with ID ALFKI not found"
+
+components:
+  schemas:
+    CustomerRequest:
+      type: object
+      required:
+        - customerId
+        - companyName
+      properties:
+        customerId:
+          type: string
+          description: 5-character customer identifier (unique)
+          minLength: 5
+          maxLength: 5
+          example: "ALFKI"
+        companyName:
+          type: string
+          description: Business/company name
+          maxLength: 40
+          example: "Alfreds Futterkiste"
+        contactName:
+          type: string
+          description: Contact person name
+          maxLength: 30
+          nullable: true
+          example: "Maria Anders"
+        contactTitle:
+          type: string
+          description: Contact person title/position
+          maxLength: 30
+          nullable: true
+          example: "Sales Representative"
+        address:
+          type: string
+          description: Street address
+          maxLength: 60
+          nullable: true
+          example: "Obere Str. 57"
+        city:
+          type: string
+          description: City
+          maxLength: 15
+          nullable: true
+          example: "Berlin"
+        region:
+          type: string
+          description: State/Province/Region
+          maxLength: 15
+          nullable: true
+          example: null
+        postalCode:
+          type: string
+          description: Postal/ZIP code
+          maxLength: 10
+          nullable: true
+          example: "12209"
+        country:
+          type: string
+          description: Country
+          maxLength: 15
+          nullable: true
+          example: "Germany"
+        phone:
+          type: string
+          description: Primary phone number
+          maxLength: 24
+          nullable: true
+          example: "030-0074321"
+        fax:
+          type: string
+          description: Fax number
+          maxLength: 24
+          nullable: true
+          example: "030-0076545"
+        contactEmail:
+          type: string
+          format: email
+          description: Contact email address
+          maxLength: 255
+          nullable: true
+          example: "maria.anders@alfki.com"
+
+    CustomerUpdateRequest:
+      type: object
+      required:
+        - companyName
+      description: Update request body (customerId is in the path, cannot be changed)
+      properties:
+        companyName:
+          type: string
+          description: Business/company name
+          maxLength: 40
+          example: "Alfreds Futterkiste"
+        contactName:
+          type: string
+          description: Contact person name
+          maxLength: 30
+          nullable: true
+          example: "Maria Anders"
+        contactTitle:
+          type: string
+          description: Contact person title/position
+          maxLength: 30
+          nullable: true
+          example: "Sales Representative"
+        address:
+          type: string
+          description: Street address
+          maxLength: 60
+          nullable: true
+          example: "Obere Str. 57"
+        city:
+          type: string
+          description: City
+          maxLength: 15
+          nullable: true
+          example: "Berlin"
+        region:
+          type: string
+          description: State/Province/Region
+          maxLength: 15
+          nullable: true
+          example: null
+        postalCode:
+          type: string
+          description: Postal/ZIP code
+          maxLength: 10
+          nullable: true
+          example: "12209"
+        country:
+          type: string
+          description: Country
+          maxLength: 15
+          nullable: true
+          example: "Germany"
+        phone:
+          type: string
+          description: Primary phone number
+          maxLength: 24
+          nullable: true
+          example: "030-0074321"
+        fax:
+          type: string
+          description: Fax number
+          maxLength: 24
+          nullable: true
+          example: "030-0076545"
+        contactEmail:
+          type: string
+          format: email
+          description: Contact email address
+          maxLength: 255
+          nullable: true
+          example: "maria.anders@alfki.com"
+
+    CustomerResponse:
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: 5-character customer identifier
+          example: "ALFKI"
+        companyName:
+          type: string
+          description: Business/company name
+          example: "Alfreds Futterkiste"
+        contactName:
+          type: string
+          description: Contact person name
+          nullable: true
+          example: "Maria Anders"
+        contactTitle:
+          type: string
+          description: Contact person title/position
+          nullable: true
+          example: "Sales Representative"
+        address:
+          type: string
+          description: Street address
+          nullable: true
+          example: "Obere Str. 57"
+        city:
+          type: string
+          description: City
+          nullable: true
+          example: "Berlin"
+        region:
+          type: string
+          description: State/Province/Region
+          nullable: true
+          example: null
+        postalCode:
+          type: string
+          description: Postal/ZIP code
+          nullable: true
+          example: "12209"
+        country:
+          type: string
+          description: Country
+          nullable: true
+          example: "Germany"
+        phone:
+          type: string
+          description: Primary phone number
+          nullable: true
+          example: "030-0074321"
+        fax:
+          type: string
+          description: Fax number
+          nullable: true
+          example: "030-0076545"
+        contactEmail:
+          type: string
+          format: email
+          description: Contact email address
+          nullable: true
+          example: "maria.anders@alfki.com"
+        createdAt:
+          type: string
+          format: date-time
+          description: Record creation timestamp
+          example: "2025-10-05T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2025-10-05T10:30:00Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Error occurrence timestamp
+          example: "2025-10-05T10:30:00Z"
+        status:
+          type: integer
+          description: HTTP status code
+          example: 400
+        error:
+          type: string
+          description: HTTP status reason phrase
+          example: "Bad Request"
+        message:
+          type: string
+          description: Error message
+          example: "Validation failed"
+        errors:
+          type: array
+          description: Detailed validation errors (optional, present for 400 validation failures)
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Field name that failed validation
+                example: "customerId"
+              rejectedValue:
+                type: string
+                description: Value that was rejected
+                example: "ABC"
+              message:
+                type: string
+                description: Validation error message
+                example: "Customer ID must be exactly 5 characters"

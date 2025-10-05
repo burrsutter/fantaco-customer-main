@@ -1,50 +1,158 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version change: 1.0.1 → 1.0.2 (patch update)
+- Modified principles: None
+- Added sections: None
+- Removed sections: None
+- Changes:
+  * Technology Stack: Containerization base image updated from Eclipse Temurin to Red Hat UBI9
+  * Rationale: Enterprise-grade security, Red Hat support, OpenShift compatibility
+- Templates requiring updates:
+  ✅ plan-template.md (already references Constitution Check)
+  ✅ tasks-template.md (already follows TDD principles)
+  ✅ spec-template.md (no updates needed)
+  ✅ research.md (updated Dockerfile pattern to use UBI9)
+  ✅ tasks.md (T005 updated to specify UBI9 images)
+- Follow-up TODOs: None
+-->
+
+# Customer Master Data API Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Test-First Development (NON-NEGOTIABLE)
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All code MUST be developed following strict Test-Driven Development:
+- Contract tests MUST be written first for all API endpoints
+- Integration tests MUST be written before implementing business logic
+- Tests MUST fail before implementation begins (Red-Green-Refactor cycle)
+- No code commits without corresponding tests
+- Minimum test coverage: 80% for service layer, 100% for controllers
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: TDD ensures correctness, prevents regressions, and serves as living documentation. In a customer data system, data integrity is paramount.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. API-First Design
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+All features MUST start with formal API contract definition:
+- OpenAPI 3.0 specification MUST be created before coding
+- Contracts MUST be reviewed and approved before implementation
+- Breaking changes MUST be explicitly versioned
+- All endpoints MUST have complete request/response schemas
+- Example data MUST be provided in API documentation
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: External systems depend on stable contracts. API-first design prevents integration breakage and facilitates parallel development.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Data Integrity & Validation
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+All data operations MUST enforce strict validation:
+- Bean Validation annotations MUST be applied to all DTOs
+- Database constraints MUST mirror application-layer validation
+- Customer ID uniqueness MUST be enforced at database level
+- Field length limits MUST be validated before database operations
+- Validation errors MUST return clear, actionable error messages
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Customer master data is shared across systems. Invalid data propagates errors downstream. Validation at multiple layers (application + database) provides defense in depth.
+
+### IV. Observability & Monitoring
+
+All services MUST be observable in production:
+- Structured logging MUST use consistent format (JSON recommended)
+- All API endpoints MUST log request/response at INFO level (excluding sensitive data)
+- Health checks MUST be exposed via Spring Boot Actuator
+- Kubernetes readiness/liveness probes MUST be configured
+- Database connection health MUST be monitored
+
+**Rationale**: Production issues require rapid diagnosis. Structured logs enable automated analysis. Health checks prevent cascading failures.
+
+### V. Simplicity & Pragmatism
+
+Design MUST favor simplicity over premature optimization:
+- Use Spring Boot defaults unless justified deviation required
+- Avoid unnecessary abstractions (repositories extend JpaRepository directly)
+- No custom query frameworks unless Spring Data JPA insufficient
+- YAGNI principle applies: implement only specified requirements
+- Document deviations from Spring Boot conventions
+
+**Rationale**: Maintenance burden grows with complexity. Spring Boot provides battle-tested patterns. Custom solutions require ongoing maintenance.
+
+## Technology Stack
+
+**REQUIRED Stack** (MUST be used for all implementations):
+- **Language**: Java 21 or later (LTS versions only)
+- **Framework**: Spring Boot 3.x (latest stable minor version)
+- **Build Tool**: Maven 3.8+ (Gradle prohibited for consistency)
+- **Database**: PostgreSQL 15+ (production), Testcontainers (testing)
+- **Testing**: JUnit 5, Spring Boot Test, Testcontainers
+- **API Documentation**: Springdoc OpenAPI 2.x
+- **Containerization**: Docker with multi-stage builds, Red Hat UBI9 base images (`ubi9/openjdk-21` for build, `ubi9/openjdk-21-runtime` for runtime)
+- **Orchestration**: Kubernetes 1.27+ (OpenShift compatible)
+- **Package Management**: Helm 3.x for Kubernetes deployments
+
+**RECOMMENDED Libraries** (use unless strong justification for alternatives):
+- **Logging**: SLF4J with Logback (Spring Boot default)
+- **Validation**: Hibernate Validator (Bean Validation 3.0)
+- **HTTP Client**: Spring WebClient (reactive) or RestTemplate (blocking)
+- **JSON Processing**: Jackson (Spring Boot default)
+
+**PROHIBITED**:
+- Spring XML configuration (annotation-based only)
+- H2 database for integration tests (use Testcontainers PostgreSQL)
+- Custom ORM frameworks (JPA/Hibernate only)
+- Non-standard dependency injection frameworks
+
+**Rationale**: Standardized stack reduces cognitive load, simplifies hiring, and ensures compatibility. PostgreSQL chosen for ACID compliance and full-text search capabilities. Testcontainers ensures test/prod parity. Red Hat UBI9 provides enterprise-grade security updates, Red Hat support, and OpenShift compatibility for hybrid cloud deployments.
+
+## Development Workflow
+
+**Branching Strategy**:
+- Feature branches MUST follow pattern: `###-feature-name` (e.g., `001-create-a-new`)
+- All work happens on feature branches (no direct commits to main)
+- Branch created automatically by `/specify` command
+
+**Code Review**:
+- All changes require review before merge
+- Constitution compliance MUST be verified
+- Tests MUST pass in CI before merge
+- Breaking changes require explicit approval
+
+**Testing Gates**:
+- Unit tests run on every commit
+- Integration tests run before merge
+- Contract tests validate API stability
+- Performance regression tests for p95 latency targets
+
+**Documentation Requirements**:
+- README.md MUST include curl examples for all endpoints
+- OpenAPI spec MUST be kept in sync with implementation
+- Database schema changes MUST be documented in migration files
+- Architecture Decision Records (ADRs) for major design choices
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+**Amendment Process**:
+1. Propose amendment via pull request to constitution file
+2. Version bump according to semantic versioning:
+   - MAJOR: Breaking principle changes (requires team vote)
+   - MINOR: New principles or sections added
+   - PATCH: Clarifications or wording improvements
+3. Update dependent templates (plan, tasks, spec) to align
+4. All in-flight features reassessed for compliance
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Compliance Verification**:
+- `/plan` command MUST check constitution before Phase 0
+- `/plan` command MUST re-check after Phase 1 design
+- Code reviews MUST verify adherence to principles
+- Violations MUST be documented in Complexity Tracking with justification
+
+**Conflict Resolution**:
+- Constitution supersedes all other development practices
+- When principles conflict, prioritize in order: I → V (Test-First has highest priority)
+- Exceptions require explicit documentation and remediation plan
+
+**Living Document Status**:
+- Constitution MUST be reviewed quarterly
+- Retrospectives MAY propose amendments
+- All developers MUST read constitution before contributing
+- CLAUDE.md and agent guidance files derive from this constitution
+
+**Version**: 1.0.1 | **Ratified**: 2025-10-05 | **Last Amended**: 2025-10-05
