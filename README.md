@@ -37,34 +37,14 @@ spring.datasource.username=postgres
 spring.datasource.password=postgres
 ```
 
-Run the application:
+Run the application and test it locally (see curl commands below for other tests)
 
 ```bash
 mvn spring-boot:run
 ```
 
-### Option 2: With Docker Compose
-
-Create `docker-compose.yml`:
-
-```yaml
-version: '3.8'
-services:
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: fantaco_customer
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-```
-
-Start PostgreSQL:
-
 ```bash
-docker-compose up -d
-mvn spring-boot:run
+open http://localhost:8081/api/customers
 ```
 
 ## Podman
@@ -79,8 +59,8 @@ podman login quay.io
 ```
 
 ```bash
-podman build --arch amd64 --os linux -t quay.io/burrsutter/fantaco-customer-main:latest -f deployment/Dockerfile .
-podman push quay.io/burrsutter/fantaco-customer-main:latest
+podman build --arch amd64 --os linux -t quay.io/burrsutter/fantaco-customer-main:1.0.0 -f deployment/Dockerfile .
+podman push quay.io/burrsutter/fantaco-customer-main:1.0.0
 ```
 
 Go into quay.io and make the image public
@@ -93,44 +73,88 @@ podman run -p 8081:8081 \
   -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/fantaco_customer \
   -e SPRING_DATASOURCE_USERNAME=postgres \
   -e SPRING_DATASOURCE_PASSWORD=admin \
-  fantaco-customer-main:latest
+  quay.io/burrsutter/fantaco-customer-main:1.0.0
 ```
 
 ### OpenShift
 
-```
+```bash
 oc new-project fantaco
 ```
 
 because I am using the docker.io postgres image
 
-```
+```bash
 oc adm policy add-scc-to-user anyuid -z default
 ```
 
-```
+Deploy Postgres
+
+```bash
 oc apply -f deployment/kubernetes/postgres/deployment.yaml
 oc apply -f deployment/kubernetes/postgres/service.yaml
 ```
 
 ```
+oc get pods
+NAME                         READY   STATUS    RESTARTS   AGE
+postgresql-665b46c48-ttrnd   1/1     Running   0          3s
+```
+
+
+Using OCP Console terminal
+
+```
+psql -U postgres
+```
+
+```
+postgres=# \l
+                                                    List of databases
+       Name       |  Owner   | Encoding |  Collate   |   Ctype    | ICU Locale | Locale Provider |   Access privileges   
+------------------+----------+----------+------------+------------+------------+-----------------+-----------------------
+ fantaco_customer | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | 
+ postgres         | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | 
+ template0        | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/postgres          +
+                  |          |          |            |            |            |                 | postgres=CTc/postgres
+ template1        | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/postgres          +
+                  |          |          |            |            |            |                 | postgres=CTc/postgres
+(4 rows)
+```
+
+Deploy the application
+
+```bash
 oc apply -f deployment/kubernetes/application/configmap.yaml
 oc apply -f deployment/kubernetes/application/secret.yaml
 oc apply -f deployment/kubernetes/application/deployment.yaml
 oc apply -f deployment/kubernetes/application/service.yaml
 ```
 
+```bash
+oc get pods
 ```
+
+```
+NAME                                     READY   STATUS    RESTARTS   AGE
+fantaco-customer-main-7bdc4dd866-46j64   1/1     Running   0          93s
+postgresql-665b46c48-ttrnd               1/1     Running   0          3m16s
+```
+
+```bash
 oc expose service fantaco-customer-service
 ```
 
-```
+```bash
 URL=http://$(oc get routes -n fantaco -l app=fantaco-customer-main -o jsonpath="{range .items[*]}{.status.ingress[0].host}{end}")
 echo $URL
-open $URL
 ```
 
+```bash
+open $URL/api/customers
 ```
+
+```bash
 curl $URL/api/customers
 ```
 

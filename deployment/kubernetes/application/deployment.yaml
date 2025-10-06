@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: fantaco-customer-main
-        image: quay.io/burrsutter/fantaco-customer-main:latest
+        image: quay.io/burrsutter/fantaco-customer-main:1.0.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8081
