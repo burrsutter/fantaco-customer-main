@@ -223,7 +223,7 @@ service:
 database:
   host: postgres-service
   port: 5432
-  name: customerdb
+  name: fantaco_customer
 
 resources:
   limits:
