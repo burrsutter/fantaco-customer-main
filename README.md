@@ -67,23 +67,77 @@ docker-compose up -d
 mvn spring-boot:run
 ```
 
-## Docker
+## Podman
 
 ### Build Image
 
 ```bash
-docker build -t fantaco-customer-main:1.0.0 -f deployment/Dockerfile .
-```
+brew install podman 
+podman machine start
 
-### Run Container
+podman login quay.io
+```
 
 ```bash
-docker run -p 8081:8081 \
+podman build --arch amd64 --os linux -t quay.io/burrsutter/fantaco-customer-main:latest -f deployment/Dockerfile .
+podman push quay.io/burrsutter/fantaco-customer-main:latest
+```
+
+Go into quay.io and make the image public
+
+
+### Run container on localhost
+
+```bash
+podman run -p 8081:8081 \
   -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/fantaco_customer \
   -e SPRING_DATASOURCE_USERNAME=postgres \
-  -e SPRING_DATASOURCE_PASSWORD=postgres \
-  fantaco-customer-main:1.0.0
+  -e SPRING_DATASOURCE_PASSWORD=admin \
+  fantaco-customer-main:latest
 ```
+
+### OpenShift
+
+```
+oc new-project fantaco
+```
+
+because I am using the docker.io postgres image
+
+```
+oc adm policy add-scc-to-user anyuid -z default
+```
+
+```
+oc apply -f deployment/kubernetes/postgres/deployment.yaml
+oc apply -f deployment/kubernetes/postgres/service.yaml
+```
+
+```
+oc apply -f deployment/kubernetes/application/configmap.yaml
+oc apply -f deployment/kubernetes/application/secret.yaml
+oc apply -f deployment/kubernetes/application/deployment.yaml
+oc apply -f deployment/kubernetes/application/service.yaml
+```
+
+```
+oc expose service fantaco-customer-service
+```
+
+```
+URL=http://$(oc get routes -n fantaco -l app=fantaco-customer-main -o jsonpath="{range .items[*]}{.status.ingress[0].host}{end}")
+echo $URL
+open $URL
+```
+
+```
+curl $URL/api/customers
+```
+
+```
+open $URL/swagger-ui/index.html
+```
+
 
 ## API Documentation
 
@@ -150,7 +204,18 @@ curl http://localhost:8081/api/customers/ALFKI
 curl "http://localhost:8081/api/customers?companyName=Alfreds"
 
 # Search by contact email
-curl "http://localhost:8081/api/customers?contactEmail=maria@"
+curl "http://localhost:8081/api/customers?contactEmail=liuwong%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=victoriaashworth%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=yangwang%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=peterfranken%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=thomashardy%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=diegoroel%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=linorodriguez%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=jaimeyorres%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=hannamoos%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=mariebertrand%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=janetelimeira%40example.com"
+curl "http://localhost:8081/api/customers?contactEmail=franwilson%40example.com"
 
 # Search by phone
 curl "http://localhost:8081/api/customers?phone=030"

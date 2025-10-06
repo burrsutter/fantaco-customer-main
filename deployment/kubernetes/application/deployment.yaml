@@ -5,7 +5,7 @@ metadata:
   labels:
     app: fantaco-customer-main
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: fantaco-customer-main
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: fantaco-customer-main
-        image: fantaco-customer-main:1.0.0
+        image: quay.io/burrsutter/fantaco-customer-main:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8081
