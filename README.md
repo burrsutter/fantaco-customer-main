@@ -44,7 +44,7 @@ mvn spring-boot:run
 ```
 
 ```bash
-open http://localhost:8081/api/customers
+open http://$CUST_URL/api/customers
 ```
 
 ## Podman
@@ -167,16 +167,57 @@ open $CUST_URL/swagger-ui/index.html
 
 Once the application is running, access:
 
-- **Swagger UI**: http://localhost:8081/swagger-ui.html
-- **OpenAPI JSON**: http://localhost:8081/v3/api-docs
-- **Health Check**: http://localhost:8081/actuator/health
+- **Swagger UI**: http://$CUST_URL/swagger-ui.html
+- **OpenAPI JSON**: http://$CUST_URL/v3/api-docs
+- **Health Check**: http://$CUST_URL/actuator/health
 
 ## API Endpoints
 
-### Create Customer
+```bash
+# export CUST_URL=http://$(oc get routes -n fantaco -l app=fantaco-customer-main -o jsonpath="{range .items[*]}{.status.ingress[0].host}{end}")
+export CUST_URL=localhost:8081
+```
+
+### Quick Test
 
 ```bash
-curl -X POST http://localhost:8081/api/customers \
+curl "http://{$CUST_URL}/api/customers"
+```
+
+### Search Customers
+
+```bash
+# Search by company name (partial match, case-insensitive)
+curl "http://$CUST_URL/api/customers?companyName=Alfreds"
+
+# Search by contact email
+curl "http://$CUST_URL/api/customers?contactEmail=liuwong%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=victoriaashworth%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=yangwang%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=peterfranken%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=thomashardy%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=diegoroel%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=linorodriguez%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=jaimeyorres%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=hannamoos%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=mariebertrand%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=janetelimeira%40example.com"
+curl "http://$CUST_URL/api/customers?contactEmail=franwilson%40example.com"
+
+# Search by phone
+curl "http://$CUST_URL/api/customers?phone=030"
+```
+
+**Response**: `200 OK` with array of customers
+
+
+
+
+### Create Customer
+
+
+```bash
+curl -X POST http://$CUST_URL/api/customers \
   -H "Content-Type: application/json" \
   -d '{
     "customerId": "ALFKI",
@@ -197,60 +238,13 @@ curl -X POST http://localhost:8081/api/customers \
 ### Get Customer by ID
 
 ```bash
-curl http://localhost:8081/api/customers/ALFKI
+curl http://$CUST_URL/api/customers/ALFKI
 ```
-
-**Response**: `200 OK`
-
-```json
-{
-  "customerId": "ALFKI",
-  "companyName": "Alfreds Futterkiste",
-  "contactName": "Maria Anders",
-  "contactTitle": "Sales Representative",
-  "address": "Obere Str. 57",
-  "city": "Berlin",
-  "region": null,
-  "postalCode": "12209",
-  "country": "Germany",
-  "phone": "030-0074321",
-  "fax": null,
-  "contactEmail": "maria.anders@alfki.com",
-  "createdAt": "2025-10-05T10:30:00",
-  "updatedAt": "2025-10-05T10:30:00"
-}
-```
-
-### Search Customers
-
-```bash
-# Search by company name (partial match, case-insensitive)
-curl "http://localhost:8081/api/customers?companyName=Alfreds"
-
-# Search by contact email
-curl "http://localhost:8081/api/customers?contactEmail=liuwong%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=victoriaashworth%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=yangwang%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=peterfranken%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=thomashardy%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=diegoroel%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=linorodriguez%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=jaimeyorres%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=hannamoos%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=mariebertrand%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=janetelimeira%40example.com"
-curl "http://localhost:8081/api/customers?contactEmail=franwilson%40example.com"
-
-# Search by phone
-curl "http://localhost:8081/api/customers?phone=030"
-```
-
-**Response**: `200 OK` with array of customers
 
 ### Update Customer
 
 ```bash
-curl -X PUT http://localhost:8081/api/customers/ALFKI \
+curl -X PUT http://$CUST_URL/api/customers/ALFKI \
   -H "Content-Type: application/json" \
   -d '{
     "companyName": "Alfreds Futterkiste GmbH",
@@ -266,7 +260,7 @@ curl -X PUT http://localhost:8081/api/customers/ALFKI \
 ### Delete Customer
 
 ```bash
-curl -X DELETE http://localhost:8081/api/customers/ALFKI
+curl -X DELETE http://$CUST_URL/api/customers/ALFKI
 ```
 
 **Response**: `204 No Content`
