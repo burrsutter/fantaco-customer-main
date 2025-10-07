@@ -146,20 +146,20 @@ oc expose service fantaco-customer-service
 ```
 
 ```bash
-URL=http://$(oc get routes -n fantaco -l app=fantaco-customer-main -o jsonpath="{range .items[*]}{.status.ingress[0].host}{end}")
-echo $URL
+CUST_URL=http://$(oc get routes -n fantaco -l app=fantaco-customer-main -o jsonpath="{range .items[*]}{.status.ingress[0].host}{end}")
+echo $CUST_URL
 ```
 
 ```bash
-open $URL/api/customers
+open $CUST_URL/api/customers
 ```
 
 ```bash
-curl $URL/api/customers
+curl $CUST_URL/api/customers
 ```
 
 ```
-open $URL/swagger-ui/index.html
+open $CUST_URL/swagger-ui/index.html
 ```
 
 
