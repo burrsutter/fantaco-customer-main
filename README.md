@@ -146,7 +146,7 @@ oc expose service fantaco-customer-service
 ```
 
 ```bash
-CUST_URL=http://$(oc get routes -n fantaco -l app=fantaco-customer-main -o jsonpath="{range .items[*]}{.status.ingress[0].host}{end}")
+export CUST_URL=http://$(oc get routes -n fantaco -l app=fantaco-customer-main -o jsonpath="{range .items[*]}{.status.ingress[0].host}{end}")
 echo $CUST_URL
 ```
 
@@ -167,42 +167,50 @@ open $CUST_URL/swagger-ui/index.html
 
 Once the application is running, access:
 
-- **Swagger UI**: http://$CUST_URL/swagger-ui.html
-- **OpenAPI JSON**: http://$CUST_URL/v3/api-docs
-- **Health Check**: http://$CUST_URL/actuator/health
+- **Swagger UI**: $CUST_URL/swagger-ui.html
+- **OpenAPI JSON**: $CUST_URL/v3/api-docs
+- **Health Check**: $CUST_URL/actuator/health
 
 ## API Endpoints
 
 ```bash
 # export CUST_URL=http://$(oc get routes -n fantaco -l app=fantaco-customer-main -o jsonpath="{range .items[*]}{.status.ingress[0].host}{end}")
-export CUST_URL=localhost:8081
+export CUST_URL=http://localhost:8081
 ```
 
 ### Quick Test
 
 ```bash
-curl "http://{$CUST_URL}/api/customers"
+curl "{$CUST_URL}/api/customers"
 ```
 
 ### Search Customers
 
 ```bash
 # Search by company name (partial match, case-insensitive)
-curl "http://$CUST_URL/api/customers?companyName=Alfreds"
+curl "$CUST_URL/api/customers?companyName=Alfreds"
 
 # Search by contact email
-curl "http://$CUST_URL/api/customers?contactEmail=liuwong%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=victoriaashworth%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=yangwang%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=peterfranken%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=thomashardy%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=diegoroel%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=linorodriguez%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=jaimeyorres%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=hannamoos%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=mariebertrand%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=janetelimeira%40example.com"
-curl "http://$CUST_URL/api/customers?contactEmail=franwilson%40example.com"
+# Finance
+curl "$CUST_URL/api/customers?contactEmail=liuwong%40example.com"
+# THECR
+curl "$CUST_URL/api/customers?contactEmail=linorodriguez%40example.com"
+# FURIB
+curl "$CUST_URL/api/customers?contactEmail=jaimeyorres%40example.com"
+# LETSS
+curl "$CUST_URL/api/customers?contactEmail=hannamoos%40example.com"
+# BLAUS
+curl "$CUST_URL/api/customers?contactEmail=mariebertrand%40example.com"
+# PARIS
+
+curl "$CUST_URL/api/customers?contactEmail=victoriaashworth%40example.com"
+curl "$CUST_URL/api/customers?contactEmail=yangwang%40example.com"
+curl "$CUST_URL/api/customers?contactEmail=peterfranken%40example.com"
+curl "$CUST_URL/api/customers?contactEmail=thomashardy%40example.com"
+curl "$CUST_URL/api/customers?contactEmail=diegoroel%40example.com"
+
+curl "$CUST_URL/api/customers?contactEmail=janetelimeira%40example.com"
+curl "$CUST_URL/api/customers?contactEmail=franwilson%40example.com"
 
 # Search by phone
 curl "http://$CUST_URL/api/customers?phone=030"
