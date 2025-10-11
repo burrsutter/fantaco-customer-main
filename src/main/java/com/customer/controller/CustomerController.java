@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -20,6 +22,8 @@ import java.util.List;
 @RequestMapping("/api/customers")
 @Tag(name = "Customer", description = "Customer master data management operations")
 public class CustomerController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
     private final CustomerService customerService;
 
@@ -35,6 +39,7 @@ public class CustomerController {
         @ApiResponse(responseCode = "409", description = "Customer ID already exists")
     })
     public ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CustomerRequest request) {
+        logger.info("createCustomer called with request: {}", request);
         CustomerResponse response = customerService.createCustomer(request);
 
         URI location = ServletUriComponentsBuilder
@@ -43,6 +48,7 @@ public class CustomerController {
                 .buildAndExpand(response.customerId())
                 .toUri();
 
+        logger.info("createCustomer returning response: {}", response);
         return ResponseEntity.created(location).body(response);
     }
 
@@ -53,7 +59,9 @@ public class CustomerController {
         @ApiResponse(responseCode = "404", description = "Customer not found")
     })
     public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable String customerId) {
+        logger.info("getCustomerById called with customerId: {}", customerId);
         CustomerResponse response = customerService.getCustomerById(customerId);
+        logger.info("getCustomerById returning response: {}", response);
         return ResponseEntity.ok(response);
     }
 
@@ -67,7 +75,10 @@ public class CustomerController {
             @RequestParam(required = false) String contactName,
             @RequestParam(required = false) String contactEmail,
             @RequestParam(required = false) String phone) {
+        logger.info("searchCustomers called with companyName: {}, contactName: {}, contactEmail: {}, phone: {}",
+                companyName, contactName, contactEmail, phone);
         List<CustomerResponse> customers = customerService.searchCustomers(companyName, contactName, contactEmail, phone);
+        logger.info("searchCustomers returning {} customers", customers.size());
         return ResponseEntity.ok(customers);
     }
 
@@ -81,7 +92,9 @@ public class CustomerController {
     public ResponseEntity<CustomerResponse> updateCustomer(
             @PathVariable String customerId,
             @Valid @RequestBody CustomerUpdateRequest request) {
+        logger.info("updateCustomer called with customerId: {}, request: {}", customerId, request);
         CustomerResponse response = customerService.updateCustomer(customerId, request);
+        logger.info("updateCustomer returning response: {}", response);
         return ResponseEntity.ok(response);
     }
 
@@ -92,7 +105,9 @@ public class CustomerController {
         @ApiResponse(responseCode = "404", description = "Customer not found")
     })
     public ResponseEntity<Void> deleteCustomer(@PathVariable String customerId) {
+        logger.info("deleteCustomer called with customerId: {}", customerId);
         customerService.deleteCustomer(customerId);
+        logger.info("deleteCustomer completed successfully for customerId: {}", customerId);
         return ResponseEntity.noContent().build();
     }
 }
